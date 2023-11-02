@@ -1,0 +1,55 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model tenants {
+  id      String    @id @default(dbgenerated("public.uuid_generate_v7()")) @db.Uuid
+  name    String?
+  created DateTime  @default(dbgenerated("LOCALTIMESTAMP")) @db.Timestamp(6)
+  updated DateTime  @default(dbgenerated("LOCALTIMESTAMP")) @db.Timestamp(6)
+  deleted DateTime? @db.Timestamp(6)
+}
+
+// /// The underlying table does not contain a valid unique identifier and can therefore currently not be handled by Prisma Client.
+// /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+// model todos {
+//   id        String?  @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+//   tenant_id String?  @db.Uuid
+//   title     String?  @db.VarChar(256)
+//   complete  Boolean?
+
+//   @@ignore
+// }
+model Book {
+  id          Int      @id @default(autoincrement())
+  user_id     String
+  user_name   String
+  src         String
+  name        String
+  description String
+  author      String
+  createdAt   DateTime @default(now())
+
+  summaries Summary[]
+}
+
+model Summary {
+  id        Int      @id @default(autoincrement())
+  title     String
+  content   String
+  createdAt DateTime @default(now())
+
+  book_id   Int
+  user_id   String
+  user_name String
+  book      Book   @relation(fields: [book_id], references: [id], onDelete: Cascade)
+  rating    Int?
+
+  @@index([book_id])
+}
